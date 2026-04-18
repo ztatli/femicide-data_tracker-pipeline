@@ -1,6 +1,9 @@
 # Output files — real news data, not tracked in repo
 output/
 
+# Internal planning — not for public repo
+TODO.md
+
 # Python cache
 __pycache__/
 *.pyc
