@@ -112,7 +112,7 @@ Output is saved to `output/haberler_YYYY_MM.csv` and `output/davalar_YYYY_MM.csv
 
 - [ ] Extend to all 81 Turkish provinces (per-city output files)
 - [ ] Historical data extraction for past months
-- [ ] Power BI / Looker Studio dashboard
+- [ ] Power BI dashboard for monthly reporting
 
 ---
 
