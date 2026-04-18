@@ -1,0 +1,18 @@
+# Output files — real news data, not tracked in repo
+output/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# VS Code
+.vscode/
+
+# Anaconda / virtualenv
+.env
+*.egg-info/
+
+# OS files
+.DS_Store
+Thumbs.db
