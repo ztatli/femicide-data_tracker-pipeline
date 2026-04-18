@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Femicide Automation Project — Konfigürasyon
-Tüm keyword, kategori ve ayarlar burada merkezi olarak tutulur.
+Femicide Automation Project — Configuration
+Central store for all keywords, categories, and settings.
 """
 
-# ── Keyword → Kategori Eşleştirmesi ─────────────────────────────────────────
+# ── Keyword → Category Mapping ───────────────────────────────────────────────
 
 CATEGORY_KEYWORDS = {
     "kadın cinayeti": [
@@ -64,12 +64,12 @@ CATEGORY_KEYWORDS = {
     ],
 }
 
-# Tüm keyword'ler düz liste (hızlı kontrol için)
+# Flat list of all keywords for fast initial matching
 ALL_KEYWORDS = [kw for kws in CATEGORY_KEYWORDS.values() for kw in kws]
 
-# Dava/soruşturma kategorisi için zorunlu bağlam kelimeleri.
-# Bir haber sadece dava keyword içeriyorsa (topic keyword yok),
-# bu listeden en az biri de geçmeli — yoksa haber atılır.
+# Required context words for court/investigation category.
+# If an article only matches court keywords (no topic keyword),
+# at least one of these must also appear — otherwise the article is discarded.
 DAVA_CONTEXT_WORDS = [
     "kadın", "kız", "çocuk", "anne", "bebek",
     "karısı", "eşini", "eşi", "kızını", "kızı",
@@ -77,18 +77,18 @@ DAVA_CONTEXT_WORDS = [
 ]
 
 
-# ── Şüpheli Yakınlık Kalıpları ───────────────────────────────────────────────
+# ── Suspect Relationship Patterns ────────────────────────────────────────────
 
 SUSPECT_PATTERNS = {
     "eş / koca": ["kocası", "eşi", "kocasından", "eşinden", "eski kocası", "eski eşi"],
     "partner": ["sevgilisi", "eski sevgilisi", "nişanlısı", "eski nişanlısı", "partneri"],
     "aile": ["babası", "ağabeyi", "kardeşi", "amcası", "dayısı", "oğlu", "kayınpederi", "erkek kardeşi"],
     "yabancı": ["kimliği belirsiz", "tanımadığı", "komşusu"],
-    "belirsiz": [],  # default
+    "belirsiz": [],  # default fallback
 }
 
 
-# ── RSS Deneme URL Şablonları ────────────────────────────────────────────────
+# ── RSS Feed URL Patterns ─────────────────────────────────────────────────────
 
 RSS_PATHS = [
     "/rss",
@@ -101,15 +101,15 @@ RSS_PATHS = [
 ]
 
 
-# ── Tarih Filtresi ───────────────────────────────────────────────────────────
+# ── Date Filter ───────────────────────────────────────────────────────────────
 
 def get_target_months():
     """
-    Hangi ay(lar)ın taranacağını döndürür.
-    Kural:
-      - Ayın 1-7. günleri arasındaysa → önceki ay + bu ay
-      - Diğer günlerde → sadece bu ay
-    Döndürür: list of (yıl, ay) tuple'ları, örn: [(2026, 4)] veya [(2026, 3), (2026, 4)]
+    Returns the month(s) to scan.
+    Rule:
+      - Days 1–7 of the month → previous month + current month
+      - All other days → current month only
+    Returns: list of (year, month) tuples, e.g. [(2026, 4)] or [(2026, 3), (2026, 4)]
     """
     from datetime import date
 
@@ -125,10 +125,10 @@ def get_target_months():
     return months
 
 
-# ── Bağlam Kelimeleri (Context Words) ───────────────────────────────────────
-# Bir haber bu listeden EN AZ BİR kelime içermiyorsa ve keyword sadece özette
-# geçiyorsa (başlıkta değil), haber atılır.
-# Bu liste çok dar tutulmuştur — gerçek haberi kaçırmamak öncelik.
+# ── Female/Child Context Words ────────────────────────────────────────────────
+# Used as a secondary filter: if a keyword match occurs only in the summary
+# (not the headline), at least one of these must also be present.
+# Kept intentionally broad to avoid missing real cases.
 
 FEMALE_CONTEXT_WORDS = [
     "kadın", "kadin",
@@ -145,9 +145,9 @@ FEMALE_CONTEXT_WORDS = [
 ]
 
 
-# ── Kaynak Dışlama Listesi ───────────────────────────────────────────────────
-# Gazete olmayan ya da istenmeyen domain'ler — 01_build_sources.py bunları atlar.
-# Yeni bir sorunlu site çıkarsa buraya ekle.
+# ── Source Exclusion List ─────────────────────────────────────────────────────
+# Non-news domains excluded by 01_build_sources.py.
+# Add any problematic domains here to exclude them permanently.
 
 EXCLUDE_DOMAINS = [
     "free-counters.org",
@@ -162,10 +162,10 @@ EXCLUDE_DOMAINS = [
 ]
 
 
-# ── Genel Ayarlar ────────────────────────────────────────────────────────────
+# ── General Settings ──────────────────────────────────────────────────────────
 
 IL = "İstanbul"
 SOURCES_FILE = "sources/istanbul_sources.csv"
 OUTPUT_DIR = "output"
-REQUEST_DELAY = 1.5      # saniye — sunucuları yormamak için
-REQUEST_TIMEOUT = 10     # saniye
+REQUEST_DELAY = 1.5      # seconds between requests — avoids overloading servers
+REQUEST_TIMEOUT = 10     # seconds
