@@ -2,22 +2,20 @@
 """
 01_build_sources.py
 -------------------
-bilgit.com'daki İstanbul yerel gazete listesini çeker ve
-sources/istanbul_sources.csv dosyasına kaydeder.
+Scrapes the local newspaper directory on bilgit.com for Istanbul
+and saves the results to sources/istanbul_sources.csv.
 
-Bu script sadece bir kez (veya kaynakları güncellemek istediğinde) çalıştırılır.
-Çalıştırma: python 01_build_sources.py
+Run once per city, or whenever the source list needs updating.
+Usage: python 01_build_sources.py
 """
 
 import csv
-import time
-import re
 from urllib.parse import urlparse, urljoin
 
 import requests
 from bs4 import BeautifulSoup
 
-from config import IL, SOURCES_FILE, REQUEST_DELAY, REQUEST_TIMEOUT, EXCLUDE_DOMAINS
+from config import IL, SOURCES_FILE, REQUEST_TIMEOUT, EXCLUDE_DOMAINS
 
 BILGIT_URL = "https://www.bilgit.com/gazete/34istanbul.html"
 
@@ -37,12 +35,12 @@ def fetch_page(url):
         r.encoding = r.apparent_encoding
         return r.text
     except Exception as e:
-        print(f"  [HATA] {url} → {e}")
+        print(f"  [ERROR] {url} → {e}")
         return None
 
 
 def normalize_url(href, base):
-    """Relative URL'leri absolute'e çevirir, geçersizleri filtreler."""
+    """Converts relative URLs to absolute; returns None for invalid ones."""
     if not href or href.startswith(("mailto:", "javascript:", "#")):
         return None
     url = urljoin(base, href.strip())
@@ -54,8 +52,8 @@ def normalize_url(href, base):
 
 def is_newspaper_url(url):
     """
-    bilgit.com içindeki navigasyon linklerini elemeye çalışır.
-    Gerçek gazete URL'leri genellikle bilgit.com dışına çıkar.
+    Filters out bilgit.com internal navigation links and excluded domains.
+    Real newspaper URLs point to external sites.
     """
     if not url:
         return False
@@ -68,7 +66,7 @@ def is_newspaper_url(url):
 
 
 def scrape_bilgit_istanbul():
-    print(f"bilgit.com → İstanbul gazeteleri çekiliyor...")
+    print("bilgit.com → Fetching Istanbul newspaper list...")
     html = fetch_page(BILGIT_URL)
     if not html:
         return []
@@ -91,7 +89,7 @@ def scrape_bilgit_istanbul():
         seen_urls.add(url)
         results.append({"gazete_adi": name, "url": url, "il": IL})
 
-    print(f"  → {len(results)} gazete bulundu.")
+    print(f"  → {len(results)} sources found.")
     return results
 
 
@@ -100,19 +98,18 @@ def save_sources(sources):
         writer = csv.DictWriter(f, fieldnames=["gazete_adi", "url", "il"])
         writer.writeheader()
         writer.writerows(sources)
-    print(f"\nKaydedildi: {SOURCES_FILE} ({len(sources)} satır)")
-    print("İpucu: Bu dosyayı Excel'de açıp yanlış/gereksiz satırları silebilirsin.")
+    print(f"\nSaved: {SOURCES_FILE} ({len(sources)} rows)")
+    print("Tip: Open in Excel to review and remove any non-news entries.")
 
 
 def main():
     sources = scrape_bilgit_istanbul()
 
     if not sources:
-        print("Hiç kaynak bulunamadı. Lütfen site yapısını kontrol et.")
+        print("No sources found. Check the site structure.")
         return
 
-    # İlk 10'u önizle
-    print("\n── İlk 10 Sonuç (önizleme) ──")
+    print("\n── First 10 results (preview) ──")
     for s in sources[:10]:
         print(f"  {s['gazete_adi']:<35} {s['url']}")
 
