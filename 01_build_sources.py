@@ -10,6 +10,7 @@ Usage: python 01_build_sources.py
 """
 
 import csv
+from datetime import date
 from urllib.parse import urlparse, urljoin
 
 import requests
@@ -94,11 +95,13 @@ def scrape_bilgit_istanbul():
 
 
 def save_sources(sources):
-    with open(SOURCES_FILE, "w", newline="", encoding="utf-8-sig") as f:
+    today = date.today()
+    dated_path = SOURCES_FILE.replace(".csv", f"_{today.strftime('%Y_%m_%d')}.csv")
+    with open(dated_path, "w", newline="", encoding="utf-8-sig") as f:
         writer = csv.DictWriter(f, fieldnames=["gazete_adi", "url", "il"])
         writer.writeheader()
         writer.writerows(sources)
-    print(f"\nSaved: {SOURCES_FILE} ({len(sources)} rows)")
+    print(f"\nSaved: {dated_path} ({len(sources)} rows)")
     print("Tip: Open in Excel to review and remove any non-news entries.")
 
 

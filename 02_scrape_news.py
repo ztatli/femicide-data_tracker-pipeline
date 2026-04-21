@@ -257,12 +257,14 @@ def articles_from_html(site_url, target_months):
 # ── Output CSV ────────────────────────────────────────────────────────────────
 
 def output_path(year, month):
-    filename = f"haberler_{year}_{month:02d}.csv"
+    day = date.today().day
+    filename = f"haberler_{year}_{month:02d}_{day:02d}.csv"
     return os.path.join(OUTPUT_DIR, filename)
 
 
 def dava_output_path(year, month):
-    filename = f"davalar_{year}_{month:02d}.csv"
+    day = date.today().day
+    filename = f"davalar_{year}_{month:02d}_{day:02d}.csv"
     return os.path.join(OUTPUT_DIR, filename)
 
 
@@ -320,11 +322,14 @@ def main():
         links |= load_existing_links(dava_output_path(*ym))
         existing_links[ym] = links
 
-    if not os.path.exists(SOURCES_FILE):
-        print(f"ERROR: {SOURCES_FILE} not found. Run 01_build_sources.py first.")
+    today = date.today()
+    dated_sources = SOURCES_FILE.replace(".csv", f"_{today.strftime('%Y_%m_%d')}.csv")
+    sources_path = dated_sources if os.path.exists(dated_sources) else SOURCES_FILE
+    if not os.path.exists(sources_path):
+        print(f"ERROR: {sources_path} not found. Run 01_build_sources.py first.")
         return
 
-    with open(SOURCES_FILE, encoding="utf-8-sig") as f:
+    with open(sources_path, encoding="utf-8-sig") as f:
         sources = list(csv.DictReader(f))
 
     print(f"{len(sources)} newspaper sources loaded.\n")
